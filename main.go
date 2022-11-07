@@ -1,63 +1,28 @@
 package main
 
 import (
-	"bytes"
-	"crypto/sha256"
 	"fmt"
 	"strings"
+
+	"github.com/keerthanchand/adaigo-blockchain/blockchain"
 )
 
-type BlockChain struct{
-	blocks []*Block
-}
-
-
-type Block struct{
-	Hash [] byte
-	Data [] byte
-	PreviousHash[] byte
-}
-
-func (b *Block) CalculateBlockHash(){
-	info:= bytes.Join([][]byte{b.Data, b.PreviousHash}, []byte{})
-	hash:=sha256.Sum256(info)
-	b.Hash=hash[:]
-}
-
-func CreateBlock(data string, previousHash []byte) *Block{
-	block:=&Block{[]byte{},[]byte(data),previousHash}
-	block.CalculateBlockHash()
-	return block
-}
-
-func (chain *BlockChain) AddBlock(data string){
-	previousBlock:= chain.blocks[len(chain.blocks) -1]
-	newBlock := CreateBlock(data, previousBlock.Hash)
-	chain.blocks = append(chain.blocks, newBlock)
-}
-
-func Genesis() *Block{
-	return CreateBlock("Genesis block", []byte{})
-}
-
-func InitBlockchain() *BlockChain{
-	return &BlockChain{[]*Block{Genesis()}}
-}
-
 func main() {
-	adaigoChain:=InitBlockchain()
+	adaigoChain := blockchain.InitBlockchain()
 	adaigoChain.AddBlock("First block in adaigochain")
 	adaigoChain.AddBlock("second block in adaigochain")
 	adaigoChain.AddBlock("third block in adaigochain")
-	adaigoChain.AddBlock("Okay, lets add some data")
+	adaigoChain.AddBlock("Okay, lets add some data {take data in please take data in some more data bro please take somemore data in iknow there is some place inside }")
 
-	for _,block := range adaigoChain.blocks{
+	for _, block := range adaigoChain.Blocks {
 		fmt.Println(strings.Repeat("-", 84))
 		fmt.Printf("Previous Hash : %x \n", block.PreviousHash)
+		fmt.Printf("Block Height  : %x \n", block.BlockHeight)
 		fmt.Printf("Data          : %x \n", block.Data)
+		fmt.Printf("Nonce         : %x \n", block.Nonce)
 		fmt.Printf("Block Hash    : %x \n", block.Hash)
 		fmt.Println(strings.Repeat("-", 84))
-		fmt.Println(strings.Repeat(" ", 42)+"|")
-		fmt.Println(strings.Repeat(" ", 42)+"|")
+		fmt.Println(strings.Repeat(" ", 42) + "|")
+		fmt.Println(strings.Repeat(" ", 42) + "|")
 	}
 }
