@@ -1,17 +1,17 @@
 package blockchain
 
+import (
+	"bytes"
+	"encoding/gob"
+	"log"
+)
 
-type BlockChain struct{
-	Blocks []*Block
-}
-
-
-type Block struct{
-	Hash [] byte
-	Data [] byte
-	PreviousHash[] byte
-	BlockHeight int
-	Nonce int
+type Block struct {
+	Hash         []byte
+	Data         []byte
+	PreviousHash []byte
+	BlockHeight  int
+	Nonce        int
 }
 
 // func (b *Block) CalculateBlockHash(){
@@ -20,26 +20,39 @@ type Block struct{
 // 	b.Hash=hash[:]
 // }
 
-func CreateBlock(data string, previousHash []byte, blockHeight int) *Block{
-	block:=&Block{[]byte{},[]byte(data),previousHash, blockHeight, 0}
+func CreateBlock(data string, previousHash []byte, blockHeight int) *Block {
+	block := &Block{[]byte{}, []byte(data), previousHash, blockHeight, 0}
 	// block.CalculateBlockHash()
-	pow:= NewProof(block)
+	pow := NewProof(block)
 	nonce, hash := pow.Run()
 	block.Hash = hash[:]
 	block.Nonce = nonce
 	return block
 }
 
-func (chain *BlockChain) AddBlock(data string){
-	previousBlock:= chain.Blocks[len(chain.Blocks) -1]
-	newBlock := CreateBlock(data, previousBlock.Hash, previousBlock.BlockHeight+1)
-	chain.Blocks = append(chain.Blocks, newBlock)
-}
-
-func Genesis() *Block{
+func Genesis() *Block {
 	return CreateBlock("Genesis block", []byte{}, 1000000)
 }
 
-func InitBlockchain() *BlockChain{
-	return &BlockChain{[]*Block{Genesis()}}
+func (b *Block) Serialize() []byte {
+	var res bytes.Buffer
+	encoder := gob.NewEncoder(&res)
+	err := encoder.Encode(b)
+	CheckError(err)
+	return res.Bytes()
+}
+
+func Deserializer(data []byte) *Block {
+	var block Block
+	deocder := gob.NewDecoder(bytes.NewReader(data))
+	err := deocder.Decode(&block)
+	CheckError(err)
+
+	return &block
+}
+
+func CheckError(err error){
+	if(err!=nil){
+		log.Panic(err)
+	}
 }
